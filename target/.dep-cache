@@ -1,0 +1,115 @@
+{
+  "bin": {},
+  "pkg-build": {
+    "/home/maksim/ecs/ecs-framework-cangjie/src": {
+      "package": "ecsFramework",
+      "isMacro": false,
+      "accessLevel": "public",
+      "timeStamp": 1773122772,
+      "dependencies": [
+        {
+          "orPackage": "",
+          "package": "std",
+          "isStd": true,
+          "imports": [
+            {
+              "file": "/home/maksim/ecs/ecs-framework-cangjie/src/sparse.cj"
+            }
+          ]
+        },
+        {
+          "orPackage": "",
+          "package": "std.collection",
+          "isStd": true,
+          "imports": [
+            {
+              "file": "/home/maksim/ecs/ecs-framework-cangjie/src/registry.cj"
+            }
+          ]
+        },
+        {
+          "orPackage": "",
+          "package": "std.reflect",
+          "isStd": true,
+          "imports": [
+            {
+              "file": "/home/maksim/ecs/ecs-framework-cangjie/src/registry.cj"
+            }
+          ]
+        }
+      ],
+      "std-dependencies": [
+        {
+          "std": [
+            "std.core"
+          ]
+        },
+        {
+          "std.binary": [
+            "std.core"
+          ]
+        },
+        {
+          "std.collection": [
+            "std.core",
+            "std.math"
+          ]
+        },
+        {
+          "std.convert": [
+            "std.core"
+          ]
+        },
+        {
+          "std.core": []
+        },
+        {
+          "std.fs": [
+            "std.collection",
+            "std.core",
+            "std.io",
+            "std.time"
+          ]
+        },
+        {
+          "std.io": [
+            "std.core"
+          ]
+        },
+        {
+          "std.math": [
+            "std.core"
+          ]
+        },
+        {
+          "std.reflect": [
+            "std.collection",
+            "std.core",
+            "std.fs",
+            "std.sync"
+          ]
+        },
+        {
+          "std.sync": [
+            "std.core",
+            "std.time"
+          ]
+        },
+        {
+          "std.time": [
+            "std.binary",
+            "std.collection",
+            "std.convert",
+            "std.core",
+            "std.io"
+          ]
+        }
+      ],
+      "features": [],
+      "product": true,
+      "testUsed": false,
+      "mockUsed": false
+    }
+  },
+  "pkg-test": {}
+}
