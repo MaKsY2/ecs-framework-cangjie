@@ -1,16 +1,20 @@
 package ecsFramework
 
 public struct Entity {
-    let id: Int64
-    let gen: Int64
+    public let id: Int64
+    public let gen: Int64
 
     public init() {
-        this.id = 0
-        this.gen = 0
+        this.id = -1
+        this.gen = -1
     }
 
     public init(id: Int64, gen: Int64) {
         this.id = id
         this.gen = gen
+    }
+
+    public func isValid(): Bool {
+        id >= 0 && gen >= 0
     }
 }

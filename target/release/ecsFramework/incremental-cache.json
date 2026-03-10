@@ -1,0 +1,14 @@
+{
+  "packageInformation": {
+    "ecsFramework": {
+      "rootPackageName": "ecsFramework",
+      "fileNameHash": "3900825701969831770",
+      "timeStamp": 1773122772,
+      "isBuilt": true,
+      "exeName": "main",
+      "hasSubPkgs": false
+    }
+  },
+  "jsonHash": "8712843891373696057",
+  "rootPackageName": "ecsFramework"
+}
