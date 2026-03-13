@@ -2,21 +2,16 @@ package ecsFramework
 
 import std.collection.*
 
-public interface ISparseSet {
-    mut func onEntityDestroyed(index: Int64): Unit
-}
-
-public class SparseSet<T> <: ISparseSet {
-    public static let NPOS: Int64 = -1
-
-    var denseEntities: ArrayList<Int64> = ArrayList<Int64>([])
-    var sparse: ArrayList<Int64> = ArrayList<Int64>([])
-    var denseData: ArrayList<T> = ArrayList<T>([])
+public class SparseSet<T> {
+    private let NPOS: Int64 = -1
+    private var denseEntities: ArrayList<Int64> = ArrayList<Int64>()
+    private var sparse: ArrayList<Int64> = ArrayList<Int64>()
+    private var denseData: ArrayList<T> = ArrayList<T>()
 
     public init() {}
 
     public func denseSize(): Int64 {
-        denseData.size
+        denseEntities.size
     }
 
     public func denseEntityAt(i: Int64): Int64 {
@@ -27,43 +22,47 @@ public class SparseSet<T> <: ISparseSet {
         denseData[i]
     }
 
-    func ensureSparseSize(entityId: Int64): Unit {
-        if (entityId < 0) {
-            return
-        }
-        while (sparse.size <= entityId) {
-            sparse.add(NPOS)
-        }
+    public func setDenseValueAt(i: Int64, value: T): Unit {
+        denseData[i] = value
     }
 
     public func has(entityId: Int64): Bool {
-        if (entityId < 0) {
-            return false
-        }
         if (entityId >= sparse.size) {
             return false
         }
-        return sparse[entityId] != NPOS
+        let denseIdx = sparse[entityId]
+        denseIdx != NPOS && denseIdx < denseEntities.size && denseEntities[denseIdx] == entityId
     }
 
     public func add(entityId: Int64, value: T): Unit {
-        ensureSparseSize(entityId)
-
-        if (has(entityId)) {
-            let di = sparse[entityId]
-            denseData[di] = value
-            return
+        while (sparse.size <= entityId) {
+            sparse.add(NPOS)
         }
-
-        let di: Int64 = denseData.size
+        
+        let denseIdx = denseEntities.size
+        sparse[entityId] = denseIdx
         denseEntities.add(entityId)
         denseData.add(value)
-        sparse[entityId] = di
     }
 
     public func get(entityId: Int64): T {
-        let di = sparse[entityId]
-        denseData[di]
+        let denseIdx = sparse[entityId]
+        denseData[denseIdx]
+    }
+
+    public func tryGet(entityId: Int64): ?T {
+        if (!has(entityId)) {
+            return None
+        }
+        Some(get(entityId))
+    }
+
+    public func set(entityId: Int64, value: T): Unit {
+        if (!has(entityId)) {
+            throw Exception("Entity does not have component")
+        }
+        let denseIdx = sparse[entityId]
+        denseData[denseIdx] = value
     }
 
     public func remove(entityId: Int64): Unit {
@@ -71,22 +70,30 @@ public class SparseSet<T> <: ISparseSet {
             return
         }
 
-        let di = sparse[entityId]
-        let last: Int64 = denseData.size - 1
+        let denseIdx = sparse[entityId]
+        let lastIdx = denseEntities.size - 1
 
-        if (di != last) {
-            denseData[di] = denseData[last]
-            let movedEntityId = denseEntities[last]
-            denseEntities[di] = movedEntityId
-            sparse[movedEntityId] = di
+        if (denseIdx != lastIdx) {
+            let movedEntityId = denseEntities[lastIdx]
+            denseEntities[denseIdx] = movedEntityId
+            denseData[denseIdx] = denseData[lastIdx]
+            sparse[movedEntityId] = denseIdx
         }
 
-        denseData.remove(at: denseData.size - 1)
-        denseEntities.remove(at: denseEntities.size - 1)
+        denseEntities.remove(lastIdx..lastIdx + 1)
+        denseData.remove(lastIdx..lastIdx + 1)
         sparse[entityId] = NPOS
     }
 
-    public func onEntityDestroyed(index: Int64): Unit {
-        remove(index)
+    public func onEntityDestroyed(entityId: Int64): Unit {
+        remove(entityId)
+    }
+
+    public func clear(): Unit {
+        denseEntities.clear()
+        denseData.clear()
+        for (i in 0..sparse.size) {
+            sparse[i] = NPOS
+        }
     }
 }
