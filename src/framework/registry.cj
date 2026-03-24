@@ -1,4 +1,4 @@
-package ecsFramework
+package ecsFramework.framework
 
 import std.collection.*
 import std.reflect.*
@@ -17,6 +17,7 @@ public class Registry {
         freeList = ArrayList<Int64>()
         nextTypeId = 0
     }
+
     func ensurePoolsSize(id: Int64): Unit {
         while (pools.size <= id) {
             pools.add(None)
@@ -46,11 +47,8 @@ public class Registry {
                 let casted: ?SparseSet<T> = p as SparseSet<T>
                 match (casted) {
                     case Some(ss) => ss
-                    case None =>
-                        // exception ???????????????????????????
-                        SparseSet<T>()
+                    case None => SparseSet<T>()
                 }
-
             case None =>
                 let p = SparseSet<T>()
                 pools[id] = Some(p)
@@ -122,5 +120,17 @@ public class Registry {
         }
         let p = getPool<T>()
         p.remove(entity.id)
+    }
+
+    public func view1<A>(): View1<A> {
+        View1<A>(getPool<A>())
+    }
+
+    public func view2<A, B>(): View2<A, B> {
+        View2<A, B>(getPool<A>(), getPool<B>())
+    }
+
+    public func view3<A, B, C>(): View3<A, B, C> {
+        View3<A, B, C>(getPool<A>(), getPool<B>(), getPool<C>())
     }
 }
