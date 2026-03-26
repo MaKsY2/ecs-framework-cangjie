@@ -1,4 +1,4 @@
-package ecsFramework
+package ecsFramework.framework
 
 public struct Entity {
     public let id: Int64
