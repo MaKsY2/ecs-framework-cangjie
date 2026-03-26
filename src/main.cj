@@ -7,15 +7,16 @@ main(): Int64 {
 
     var i: Int64 = 0
     while (i < 5) {
-        world.addObject(Float64(i), Float64(i) * 2.0, 1.0, 0.5)
+        let params = EntityParams(Float64(i), Float64(i) * 2.0, 1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0)
+        world.createEntity(EntityType.Moving, params)
         i += 1
     }
 
-    println("Before update: sumX=${world.sumX()} sumY=${world.sumY()}")
+    println("Before update: entities=${world.countEntities()}")
 
-    world.update()
+    world.update(SystemType.Movement)
 
-    println("After update:  sumX=${world.sumX()} sumY=${world.sumY()}")
+    println("After update:  entities=${world.countEntities()}")
 
     return 0
 }
