@@ -27,3 +27,36 @@ public struct Health {
         this.hp = hp
     }
 }
+
+public struct Damage {
+    public var dmg: Float64
+
+    public init(dmg: Float64) {
+        this.dmg = dmg
+    }
+}
+
+public struct Armor {
+    public var armor: Float64
+
+    public init(armor: Float64) {
+        this.armor = armor
+    }
+}
+
+public struct Lifetime {
+    public var remaining: Float64
+
+    public init(remaining: Float64) {
+        this.remaining = remaining
+    }
+}
+
+public struct Team {
+    public var teamId: Int64
+
+    public init(teamId: Int64) {
+        this.teamId = teamId
+    }
+}
+

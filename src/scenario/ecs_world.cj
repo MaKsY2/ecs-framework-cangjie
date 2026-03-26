@@ -1,21 +1,59 @@
 package ecsFramework.scenario
 
 import ecsFramework.framework.*
+import std.collection.*
 
-public class EcsWorld {
+public class EcsWorld <: IWorld {
     public var registry: Registry
 
     public init() {
         registry = Registry()
     }
 
-    public func addObject(x: Float64, y: Float64, vx: Float64, vy: Float64): Unit {
+    public func createEntity(entityType: EntityType, params: EntityParams): Unit {
         let e = registry.createEntity()
-        registry.addComponent<Position>(e, Position(x, y))
-        registry.addComponent<Velocity>(e, Velocity(vx, vy))
+        
+        match (entityType) {
+            case Moving =>
+                registry.addComponent<Position>(e, Position(params.x, params.y))
+                registry.addComponent<Velocity>(e, Velocity(params.vx, params.vy))
+            
+            case Combat =>
+                registry.addComponent<Position>(e, Position(params.x, params.y))
+                registry.addComponent<Velocity>(e, Velocity(params.vx, params.vy))
+                registry.addComponent<Health>(e, Health(params.hp))
+                registry.addComponent<Damage>(e, Damage(params.dmg))
+                registry.addComponent<Team>(e, Team(params.teamId))
+            
+            case Armored =>
+                registry.addComponent<Position>(e, Position(params.x, params.y))
+                registry.addComponent<Velocity>(e, Velocity(params.vx, params.vy))
+                registry.addComponent<Health>(e, Health(params.hp))
+                registry.addComponent<Armor>(e, Armor(params.armor))
+                registry.addComponent<Team>(e, Team(params.teamId))
+            
+            case Projectile =>
+                registry.addComponent<Position>(e, Position(params.x, params.y))
+                registry.addComponent<Velocity>(e, Velocity(params.vx, params.vy))
+                registry.addComponent<Damage>(e, Damage(params.dmg))
+                registry.addComponent<Lifetime>(e, Lifetime(params.lifetime))
+        }
     }
 
-    public func update(): Unit {
+    public func update(systemType: SystemType): Unit {
+        match (systemType) {
+            case Movement =>
+                updateMovement()
+            case Lifetime =>
+                updateLifetime()
+            case Combat =>
+                applyDamageToArmored()
+            case Cleanup =>
+                removeDeadEntities()
+        }
+    }
+
+    func updateMovement(): Unit {
         let v = registry.view2<Position, Velocity>()
         v.each({ eid, pos, vel =>
             let newPos = Position(pos.x + vel.vx, pos.y + vel.vy)
@@ -23,29 +61,55 @@ public class EcsWorld {
         })
     }
 
-    public func sumX(): Float64 {
-        var s: Float64 = 0.0
-        let pool = registry.getPool<Position>()
-        var i: Int64 = 0
-        while (i < pool.denseSize()) {
-            s += pool.denseValueAt(i).x
-            i += 1
+    func updateLifetime(): Unit {
+        let v = registry.view1<Lifetime>()
+        let toDestroy = ArrayList<Entity>()
+        
+        v.each({ eid, lifetime =>
+            let newLifetime = lifetime.remaining - 1.0
+            if (newLifetime <= 0.0) {
+                toDestroy.add(Entity(eid, 0))
+            } else {
+                registry.getPool<Lifetime>().add(eid, Lifetime(newLifetime))
+            }
+        })
+
+        for (e in toDestroy) {
+            registry.destroyEntity(e)
         }
-        s
     }
 
-    public func sumY(): Float64 {
-        var s: Float64 = 0.0
-        let pool = registry.getPool<Position>()
-        var i: Int64 = 0
-        while (i < pool.denseSize()) {
-            s += pool.denseValueAt(i).y
-            i += 1
-        }
-        s
+    func applyDamageToArmored(): Unit {
+        let attackers = registry.view2<Damage, Team>()
+        let defenders = registry.view3<Health, Armor, Team>()
+
+        attackers.each({ atkId, dmg, atkTeam =>
+            defenders.each({ defId, hp, armor, defTeam =>
+                if (atkTeam.teamId != defTeam.teamId) {
+                    let actualDmg = dmg.dmg * (1.0 - armor.armor * 0.01)
+                    let newHp = hp.hp - actualDmg
+                    registry.getPool<Health>().add(defId, Health(newHp))
+                }
+            })
+        })
     }
 
-    public func size(): Int64 {
+    func removeDeadEntities(): Unit {
+        let v = registry.view1<Health>()
+        let toDestroy = ArrayList<Entity>()
+        
+        v.each({ eid, hp =>
+            if (hp.hp <= 0.0) {
+                toDestroy.add(Entity(eid, 0))
+            }
+        })
+
+        for (e in toDestroy) {
+            registry.destroyEntity(e)
+        }
+    }
+
+    public func countEntities(): Int64 {
         registry.getPool<Position>().denseSize()
     }
 }

@@ -12,128 +12,249 @@ func measureNs(f: () -> Unit): Int64 {
     (t1 - t0).toNanoseconds()
 }
 
-func buildEcsBench(n: Int64): EcsWorld {
-    let world = EcsWorld()
-    var i: Int64 = 0
-    while (i < n) {
-        world.addObject(Float64(i), Float64(i), 1.0, 1.0)
-        i += 1
-    }
-    world
-}
-
-func buildOopBench(n: Int64): OopWorld {
-    let world = OopWorld()
-    var i: Int64 = 0
-    while (i < n) {
-        world.addObject(Float64(i), Float64(i), 1.0, 1.0)
-        i += 1
-    }
-    world
-}
-
-func runEcsUpdates(world: EcsWorld, ticks: Int64): Unit {
-    var t: Int64 = 0
-    while (t < ticks) {
-        world.update()
-        t += 1
-    }
-}
-
-func runOopUpdates(world: OopWorld, ticks: Int64): Unit {
-    var t: Int64 = 0
-    while (t < ticks) {
-        world.update()
-        t += 1
-    }
-}
-
 @Test
 class BenchmarkTests {
     @TestCase
-    func benchUpdateOnly1000(): Unit {
-        let ecs = buildEcsBench(1000)
-        let oop = buildOopBench(1000)
+    func benchSelectiveProcessing(): Unit {
+        let ecsWorld = EcsWorld()
+        let oopWorld = OopWorld()
 
-        let ecsNs = measureNs({ => runEcsUpdates(ecs, 1) })
-        let oopNs = measureNs({ => runOopUpdates(oop, 1) })
+        var i: Int64 = 0
+        while (i < 1000) {
+            let params = EntityParams(Float64(i), Float64(i), 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0)
+            ecsWorld.createEntity(EntityType.Moving, params)
+            oopWorld.createEntity(EntityType.Moving, params)
+            i += 1
+        }
 
-        println("bench update_only n=1000  ECS: ${ecsNs} ns  OOP: ${oopNs} ns")
-    }
+        i = 0
+        while (i < 200) {
+            let params = EntityParams(Float64(i), Float64(i), 2.0, 2.0, 0.0, 10.0, 0.0, 100.0, 0)
+            ecsWorld.createEntity(EntityType.Projectile, params)
+            oopWorld.createEntity(EntityType.Projectile, params)
+            i += 1
+        }
 
-    @TestCase
-    func benchUpdateOnly10000(): Unit {
-        let ecs = buildEcsBench(10000)
-        let oop = buildOopBench(10000)
-
-        let ecsNs = measureNs({ => runEcsUpdates(ecs, 1) })
-        let oopNs = measureNs({ => runOopUpdates(oop, 1) })
-
-        println("bench update_only n=10000  ECS: ${ecsNs} ns  OOP: ${oopNs} ns")
-    }
-
-    @TestCase
-    func benchManyTicks100x1000(): Unit {
-        let ecs = buildEcsBench(1000)
-        let oop = buildOopBench(1000)
-
-        let ecsNs = measureNs({ => runEcsUpdates(ecs, 100) })
-        let oopNs = measureNs({ => runOopUpdates(oop, 100) })
-
-        println("bench many_ticks n=1000 ticks=100  ECS: ${ecsNs} ns  OOP: ${oopNs} ns")
-    }
-
-    @TestCase
-    func benchManyTicks300x1000(): Unit {
-        let ecs = buildEcsBench(1000)
-        let oop = buildOopBench(1000)
-
-        let ecsNs = measureNs({ => runEcsUpdates(ecs, 300) })
-        let oopNs = measureNs({ => runOopUpdates(oop, 300) })
-
-        println("bench many_ticks n=1000 ticks=300  ECS: ${ecsNs} ns  OOP: ${oopNs} ns")
-    }
-
-    @TestCase
-    func benchManyTicks1000x1000(): Unit {
-        let ecs = buildEcsBench(1000)
-        let oop = buildOopBench(1000)
-
-        let ecsNs = measureNs({ => runEcsUpdates(ecs, 1000) })
-        let oopNs = measureNs({ => runOopUpdates(oop, 1000) })
-
-        println("bench many_ticks n=1000 ticks=1000  ECS: ${ecsNs} ns  OOP: ${oopNs} ns")
-    }
-
-    @TestCase
-    func benchBuildAndUpdate1000(): Unit {
-        let ecsNs = measureNs({
-            =>
-            let world = buildEcsBench(1000)
-            runEcsUpdates(world, 1)
-        })
-        let oopNs = measureNs({
-            =>
-            let world = buildOopBench(1000)
-            runOopUpdates(world, 1)
+        let ecsNs = measureNs({ =>
+            ecsWorld.update(SystemType.Movement)
+            ecsWorld.update(SystemType.Lifetime)
         })
 
-        println("bench build_and_update n=1000  ECS: ${ecsNs} ns  OOP: ${oopNs} ns")
+        let oopNs = measureNs({ =>
+            oopWorld.update(SystemType.Movement)
+            oopWorld.update(SystemType.Lifetime)
+        })
+
+        println("bench selective_processing (1000 moving + 200 projectiles)  ECS: ${ecsNs} ns  OOP: ${oopNs} ns")
     }
 
     @TestCase
-    func benchBuildAndUpdate10000(): Unit {
-        let ecsNs = measureNs({
-            =>
-            let world = buildEcsBench(10000)
-            runEcsUpdates(world, 1)
-        })
-        let oopNs = measureNs({
-            =>
-            let world = buildOopBench(10000)
-            runOopUpdates(world, 1)
+    func benchMultipleSystemsOnSubsets(): Unit {
+        let ecsWorld = EcsWorld()
+        let oopWorld = OopWorld()
+
+        var i: Int64 = 0
+        while (i < 500) {
+            let params = EntityParams(Float64(i), Float64(i), 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0)
+            ecsWorld.createEntity(EntityType.Moving, params)
+            oopWorld.createEntity(EntityType.Moving, params)
+            i += 1
+        }
+
+        i = 0
+        while (i < 100) {
+            let params = EntityParams(Float64(i), Float64(i), 1.0, 1.0, 100.0, 10.0, 0.0, 0.0, 0)
+            ecsWorld.createEntity(EntityType.Combat, params)
+            oopWorld.createEntity(EntityType.Combat, params)
+            i += 1
+        }
+
+        i = 0
+        while (i < 100) {
+            let params = EntityParams(Float64(i), Float64(i), 1.0, 1.0, 150.0, 0.0, 20.0, 0.0, 1)
+            ecsWorld.createEntity(EntityType.Armored, params)
+            oopWorld.createEntity(EntityType.Armored, params)
+            i += 1
+        }
+
+        i = 0
+        while (i < 300) {
+            let params = EntityParams(Float64(i), Float64(i), 2.0, 2.0, 0.0, 5.0, 0.0, 50.0, 0)
+            ecsWorld.createEntity(EntityType.Projectile, params)
+            oopWorld.createEntity(EntityType.Projectile, params)
+            i += 1
+        }
+
+        let ecsNs = measureNs({ =>
+            ecsWorld.update(SystemType.Movement)
+            ecsWorld.update(SystemType.Lifetime)
+            ecsWorld.update(SystemType.Combat)
+            ecsWorld.update(SystemType.Cleanup)
         })
 
-        println("bench build_and_update n=10000  ECS: ${ecsNs} ns  OOP: ${oopNs} ns")
+        let oopNs = measureNs({ =>
+            oopWorld.update(SystemType.Movement)
+            oopWorld.update(SystemType.Lifetime)
+            oopWorld.update(SystemType.Combat)
+            oopWorld.update(SystemType.Cleanup)
+        })
+
+        println("bench multiple_systems (500 moving + 100 combat + 100 armored + 300 projectiles)  ECS: ${ecsNs} ns  OOP: ${oopNs} ns")
+    }
+
+    @TestCase
+    func benchSparseComponentAccess(): Unit {
+        let ecsWorld = EcsWorld()
+        let oopWorld = OopWorld()
+
+        var i: Int64 = 0
+        while (i < 2000) {
+            let params = EntityParams(Float64(i), Float64(i), 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0)
+            ecsWorld.createEntity(EntityType.Moving, params)
+            oopWorld.createEntity(EntityType.Moving, params)
+            i += 1
+        }
+
+        i = 0
+        while (i < 50) {
+            let params = EntityParams(Float64(i), Float64(i), 1.0, 1.0, 100.0, 10.0, 0.0, 0.0, 0)
+            ecsWorld.createEntity(EntityType.Combat, params)
+            oopWorld.createEntity(EntityType.Combat, params)
+            i += 1
+        }
+
+        i = 0
+        while (i < 50) {
+            let params = EntityParams(Float64(i), Float64(i), 1.0, 1.0, 150.0, 0.0, 30.0, 0.0, 1)
+            ecsWorld.createEntity(EntityType.Armored, params)
+            oopWorld.createEntity(EntityType.Armored, params)
+            i += 1
+        }
+
+        let ecsNs = measureNs({ =>
+            ecsWorld.update(SystemType.Combat)
+        })
+
+        let oopNs = measureNs({ =>
+            oopWorld.update(SystemType.Combat)
+        })
+
+        println("bench sparse_component_access (2000 entities, only 100 with combat components)  ECS: ${ecsNs} ns  OOP: ${oopNs} ns")
+    }
+
+    @TestCase
+    func benchDynamicEntityLifecycle(): Unit {
+        let ecsWorld = EcsWorld()
+        let oopWorld = OopWorld()
+
+        var i: Int64 = 0
+        while (i < 500) {
+            let params = EntityParams(Float64(i), Float64(i), 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0)
+            ecsWorld.createEntity(EntityType.Moving, params)
+            oopWorld.createEntity(EntityType.Moving, params)
+            i += 1
+        }
+
+        let ecsNs = measureNs({ =>
+            var j: Int64 = 0
+            while (j < 100) {
+                let params = EntityParams(Float64(j), Float64(j), 2.0, 2.0, 0.0, 10.0, 0.0, 10.0, 0)
+                ecsWorld.createEntity(EntityType.Projectile, params)
+                j += 1
+            }
+            
+            var tick: Int64 = 0
+            while (tick < 15) {
+                ecsWorld.update(SystemType.Movement)
+                ecsWorld.update(SystemType.Lifetime)
+                tick += 1
+            }
+        })
+
+        let oopNs = measureNs({ =>
+            var j: Int64 = 0
+            while (j < 100) {
+                let params = EntityParams(Float64(j), Float64(j), 2.0, 2.0, 0.0, 10.0, 0.0, 10.0, 0)
+                oopWorld.createEntity(EntityType.Projectile, params)
+                j += 1
+            }
+            
+            var tick: Int64 = 0
+            while (tick < 15) {
+                oopWorld.update(SystemType.Movement)
+                oopWorld.update(SystemType.Lifetime)
+                tick += 1
+            }
+        })
+
+        println("bench dynamic_entity_lifecycle (500 base + 100 projectiles with 15 ticks)  ECS: ${ecsNs} ns  OOP: ${oopNs} ns")
+    }
+
+    @TestCase
+    func benchMixedWorkload(): Unit {
+        let ecsWorld = EcsWorld()
+        let oopWorld = OopWorld()
+
+        var i: Int64 = 0
+        while (i < 300) {
+            let params = EntityParams(Float64(i), Float64(i), 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0)
+            ecsWorld.createEntity(EntityType.Moving, params)
+            oopWorld.createEntity(EntityType.Moving, params)
+            i += 1
+        }
+
+        i = 0
+        while (i < 100) {
+            let params = EntityParams(Float64(i), Float64(i), 1.0, 1.0, 100.0, 15.0, 0.0, 0.0, 0)
+            ecsWorld.createEntity(EntityType.Combat, params)
+            oopWorld.createEntity(EntityType.Combat, params)
+            i += 1
+        }
+
+        i = 0
+        while (i < 100) {
+            let params = EntityParams(Float64(i), Float64(i), 1.0, 1.0, 200.0, 0.0, 25.0, 0.0, 1)
+            ecsWorld.createEntity(EntityType.Armored, params)
+            oopWorld.createEntity(EntityType.Armored, params)
+            i += 1
+        }
+
+        let ecsNs = measureNs({ =>
+            var tick: Int64 = 0
+            while (tick < 10) {
+                var j: Int64 = 0
+                while (j < 20) {
+                    let params = EntityParams(Float64(j), Float64(j), 3.0, 3.0, 0.0, 8.0, 0.0, 5.0, 0)
+                    ecsWorld.createEntity(EntityType.Projectile, params)
+                    j += 1
+                }
+                
+                ecsWorld.update(SystemType.Movement)
+                ecsWorld.update(SystemType.Lifetime)
+                ecsWorld.update(SystemType.Combat)
+                ecsWorld.update(SystemType.Cleanup)
+                tick += 1
+            }
+        })
+
+        let oopNs = measureNs({ =>
+            var tick: Int64 = 0
+            while (tick < 10) {
+                var j: Int64 = 0
+                while (j < 20) {
+                    let params = EntityParams(Float64(j), Float64(j), 3.0, 3.0, 0.0, 8.0, 0.0, 5.0, 0)
+                    oopWorld.createEntity(EntityType.Projectile, params)
+                    j += 1
+                }
+                
+                oopWorld.update(SystemType.Movement)
+                oopWorld.update(SystemType.Lifetime)
+                oopWorld.update(SystemType.Combat)
+                oopWorld.update(SystemType.Cleanup)
+                tick += 1
+            }
+        })
+
+        println("bench mixed_workload (300 moving + 100 combat + 100 armored + dynamic projectiles, 10 ticks)  ECS: ${ecsNs} ns  OOP: ${oopNs} ns")
     }
 }
