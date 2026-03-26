@@ -1,4 +1,4 @@
-package ecsFramework
+package ecsFramework.framework
 
 import std.collection.*
 
@@ -9,9 +9,9 @@ public interface ISparseSet {
 public class SparseSet<T> <: ISparseSet {
     public static let NPOS: Int64 = -1
 
-    var denseEntities: ArrayList<Int64> = ArrayList<Int64>([])
-    var sparse: ArrayList<Int64> = ArrayList<Int64>([])
-    var denseData: ArrayList<T> = ArrayList<T>([])
+    public var denseEntities: ArrayList<Int64> = ArrayList<Int64>([])
+    public var sparse: ArrayList<Int64> = ArrayList<Int64>([])
+    public var denseData: ArrayList<T> = ArrayList<T>([])
 
     public init() {}
 
@@ -25,6 +25,10 @@ public class SparseSet<T> <: ISparseSet {
 
     public func denseValueAt(i: Int64): T {
         denseData[i]
+    }
+
+    public func getDenseIndex(entityId: Int64): Int64 {
+        sparse[entityId]
     }
 
     func ensureSparseSize(entityId: Int64): Unit {
@@ -64,6 +68,11 @@ public class SparseSet<T> <: ISparseSet {
     public func get(entityId: Int64): T {
         let di = sparse[entityId]
         denseData[di]
+    }
+
+    public func update(entityId: Int64, f: (T) -> T): Unit {
+        let di = sparse[entityId]
+        denseData[di] = f(denseData[di])
     }
 
     public func remove(entityId: Int64): Unit {
