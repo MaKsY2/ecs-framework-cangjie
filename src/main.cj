@@ -1,23 +1,23 @@
 package ecsFramework
 
-import std.time.*
-import ecsFramework.bench.*
-import ecsFramework.bench.ecs.*
-import ecsFramework.bench.oop.*
+import ecsmacros.*
 
-main(): Int64 {
-    let start = DateTime.now()
-
-    twoComponentsOOP()
-
-    let end = DateTime.now()
-    println("Elapsed: ${(end - start).toNanoseconds()}")
-
-    return 0
+@Component
+public struct Position {
+    public var x: Float64 = 0.0
+    public var y: Float64 = 0.0
 }
 
-// OOP Elapsed: 0.00383715 sec
-// ECS Elapsed: 0.25954009 sec 
+main(): Int64 {
+    let e = Entity()
+    Position.add(e, Position(1.0, 2.0))
 
-// ECS Elapsed: 0.08669605 sec
-// OOP Elapsed: 0.00046389 sec 
+    if (Position.has(e)) {
+        let p = Position.get(e)
+        println(p.x)
+        println(p.y)
+    }
+
+    Position.remove(e)
+    return 0
+}

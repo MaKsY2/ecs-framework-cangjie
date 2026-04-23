@@ -7,6 +7,8 @@
   compile-option = "-O2"
   override-compile-option = ""
   link-option = ""
-  package-configuration = {}
+  [package.package-configuration]
 
 [dependencies]
+  [dependencies.ecsmacros]
+    path = "./macros"

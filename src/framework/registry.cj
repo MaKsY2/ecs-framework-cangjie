@@ -1,11 +1,12 @@
 package ecsFramework.framework
 
+import ecsmacros.*
 import std.collection.*
 import std.reflect.*
 
 public class Registry {
     var indexFinder: HashMap<TypeInfo, Int64>
-    var pools: ArrayList<?ISparseSet>
+    private var pools: ArrayList<?ISparseSet>
     var gens: ArrayList<Int64>
     var freeList: ArrayList<Int64>
     var nextTypeId: Int64
@@ -18,7 +19,7 @@ public class Registry {
         nextTypeId = 0
     }
 
-    func ensurePoolsSize(id: Int64): Unit {
+    private func ensurePoolsSize(id: Int64): Unit {
         while (pools.size <= id) {
             pools.add(None)
         }
@@ -34,29 +35,6 @@ public class Registry {
                 nextTypeId += 1
                 indexFinder.add(t, typeId)
                 typeId
-        }
-    }
-
-    public func mutComponent<ComponentType>(index: Int64, mutator: (ComponentType) -> ComponentType): Unit {
-        mutator(getPool<ComponentType>().get(index))
-    }
-
-    public func getPool<T>(): SparseSet<T> {
-        let id = typeId<T>()
-        ensurePoolsSize(id)
-
-        let slot: ?ISparseSet = pools[id]
-        match (slot) {
-            case Some(p) =>
-                let casted: ?SparseSet<T> = p as SparseSet<T>
-                match (casted) {
-                    case Some(ss) => ss
-                    case None => SparseSet<T>()
-                }
-            case None =>
-                let p = SparseSet<T>()
-                pools[id] = Some(p)
-                p
         }
     }
 
@@ -97,7 +75,7 @@ public class Registry {
         freeList.add(entity.id)
     }
 
-    public func addComponent<T>(entity: Entity, component: T): Unit {
+    public func addComponent<T>(entity: Entity, component: T): Unit  {
         if (!alive(entity)) {
             return
         }
@@ -105,7 +83,7 @@ public class Registry {
         p.add(entity.id, component)
     }
 
-    public func hasComponent<T>(entity: Entity): Bool {
+    public func hasComponent<T>(entity: Entity): Bool  {
         if (!alive(entity)) {
             return false
         }
@@ -113,12 +91,12 @@ public class Registry {
         p.has(entity.id)
     }
 
-    public func getComponent<T>(entity: Entity): T {
+    public func getComponent<T>(entity: Entity): T  {
         let p = getPool<T>()
         p.get(entity.id)
     }
 
-    public func removeComponent<T>(entity: Entity): Unit {
+    public func removeComponent<T>(entity: Entity): Unit  {
         if (!alive(entity)) {
             return
         }
@@ -126,11 +104,11 @@ public class Registry {
         p.remove(entity.id)
     }
 
-    public func view1<A>(): View1<A> {
+    public func view1<A>(): View1<A>  {
         View1<A>(getPool<A>())
     }
 
-    public func view2<A, B>(): View2<A, B> {
+    public func view2<A, B>(): View2<A, B>  {
         View2<A, B>(getPool<A>(), getPool<B>())
     }
 

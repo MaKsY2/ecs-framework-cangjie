@@ -1,0 +1,6 @@
+[package]
+cjc-version = "1.0.0"
+name = "ecsmacros"
+version = "0.1.0"
+output-type = "dynamic"
+

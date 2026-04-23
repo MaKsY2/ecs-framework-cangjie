@@ -1,5 +1,9 @@
 package ecsFramework.scenario
 
+import ecsmacros.*
+import ecsFramework.framework.ComponentMeta
+
+@Component[0]
 public struct Position {
     public var x: Float64
     public var y: Float64
@@ -10,6 +14,7 @@ public struct Position {
     }
 }
 
+@Component[1]
 public struct Velocity {
     public var vx: Float64
     public var vy: Float64
@@ -20,6 +25,7 @@ public struct Velocity {
     }
 }
 
+@Component[2]
 public struct Health {
     public var hp: Float64
 
@@ -28,6 +34,7 @@ public struct Health {
     }
 }
 
+@Component[3]
 public struct Damage {
     public var dmg: Float64
 
@@ -36,6 +43,7 @@ public struct Damage {
     }
 }
 
+@Component[4]
 public struct Armor {
     public var armor: Float64
 
@@ -44,6 +52,7 @@ public struct Armor {
     }
 }
 
+@Component[5]
 public struct Lifetime {
     public var remaining: Float64
 
@@ -52,6 +61,7 @@ public struct Lifetime {
     }
 }
 
+@Component[6]
 public struct Team {
     public var teamId: Int64
 
@@ -59,4 +69,3 @@ public struct Team {
         this.teamId = teamId
     }
 }
-

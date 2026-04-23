@@ -1,5 +1,9 @@
 package ecsFramework.bench
 
+import ecsFramework.framework.*
+import ecsmacros.*
+
+@Component[0]
 public struct Position {
     public var x: Float64
     public var y: Float64
@@ -10,6 +14,7 @@ public struct Position {
     }
 }
 
+@Component[1]
 public struct Velocity {
     public var vx: Float64
     public var vy: Float64
