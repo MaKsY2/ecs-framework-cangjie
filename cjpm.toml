@@ -4,7 +4,7 @@
   description = "nothing here"
   version = "1.0.0"
   output-type = "executable"
-  compile-option = ""
+  compile-option = "-O2"
   override-compile-option = ""
   link-option = ""
   package-configuration = {}

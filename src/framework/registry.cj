@@ -37,6 +37,10 @@ public class Registry {
         }
     }
 
+    public func mutComponent<ComponentType>(index: Int64, mutator: (ComponentType) -> ComponentType): Unit {
+        mutator(getPool<ComponentType>().get(index))
+    }
+
     public func getPool<T>(): SparseSet<T> {
         let id = typeId<T>()
         ensurePoolsSize(id)

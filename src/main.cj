@@ -1,22 +1,23 @@
 package ecsFramework
 
-import ecsFramework.scenario.*
+import std.time.*
+import ecsFramework.bench.*
+import ecsFramework.bench.ecs.*
+import ecsFramework.bench.oop.*
 
 main(): Int64 {
-    let world = EcsWorld()
+    let start = DateTime.now()
 
-    var i: Int64 = 0
-    while (i < 5) {
-        let params = EntityParams(Float64(i), Float64(i) * 2.0, 1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0)
-        world.createEntity(EntityType.Moving, params)
-        i += 1
-    }
+    twoComponentsOOP()
 
-    println("Before update: entities=${world.countEntities()}")
-
-    world.update(SystemType.Movement)
-
-    println("After update:  entities=${world.countEntities()}")
+    let end = DateTime.now()
+    println("Elapsed: ${(end - start).toNanoseconds()}")
 
     return 0
 }
+
+// OOP Elapsed: 0.00383715 sec
+// ECS Elapsed: 0.25954009 sec 
+
+// ECS Elapsed: 0.08669605 sec
+// OOP Elapsed: 0.00046389 sec 
