@@ -12,7 +12,7 @@ public macro Component(input: Tokens): Tokens {
 
                 private let $(poolIdent) = ComponentPool<$(ty)>()
 
-                extend $(ty) {
+                extend $(ty) <: Component<$(ty)> {
                     public static func add(entity: Entity, value: $(ty)): Unit {
                         $(poolIdent).add(entity, value)
                     }
@@ -27,6 +27,30 @@ public macro Component(input: Tokens): Tokens {
 
                     public static func remove(entity: Entity): Unit {
                         $(poolIdent).remove(entity)
+                    }
+
+                    public static func denseSize(): Int64 {
+                        $(poolIdent).denseSize()
+                    }
+
+                    public static func denseEntityAt(i: Int64): Int64 {
+                        $(poolIdent).denseEntityAt(i)
+                    }
+
+                    public static func denseValueAt(i: Int64): $(ty) {
+                        $(poolIdent).denseValueAt(i)
+                    }
+
+                    public static func getById(entityId: Int64): $(ty) {
+                        $(poolIdent).getById(entityId)
+                    }
+
+                    public static func hasById(entityId: Int64): Bool {
+                        $(poolIdent).hasById(entityId)
+                    }
+
+                    public static func removeById(entityId: Int64): Unit {
+                        $(poolIdent).removeById(entityId)
                     }
                 }
             )

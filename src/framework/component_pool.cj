@@ -18,4 +18,28 @@ public class ComponentPool<T> <: IComponentStorage<T> {
     public func remove(entity: Entity): Unit {
         sparse.remove(entity.id)
     }
+
+    public func getById(entityId: Int64): T {
+        sparse.get(entityId)
+    }
+
+    public func hasById(entityId: Int64): Bool {
+        sparse.has(entityId)
+    }
+
+    public func removeById(entityId: Int64): Unit {
+        sparse.remove(entityId)
+    }
+
+    public func denseSize(): Int64 {
+        sparse.denseSize()
+    }
+
+    public func denseEntityAt(i: Int64): Int64 {
+        sparse.denseEntityAt(i)
+    }
+
+    public func denseValueAt(i: Int64): T {
+        sparse.denseValueAt(i)
+    }
 }
