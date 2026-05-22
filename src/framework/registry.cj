@@ -1,6 +1,5 @@
 package ecsFramework.framework
 
-import ecsmacros.*
 import std.collection.*
 
 public class Registry {
@@ -33,6 +32,21 @@ public class Registry {
         }
     }
 
+    public func entityOf(id: Int64): Entity {
+        if (id < 0 || id >= gens.size) {
+            return Entity()
+        }
+        Entity(id, gens[id])
+    }
+
+    public func destroyEntity(e: Entity): Unit {
+        if (!alive(e)) {
+            return
+        }
+        gens[e.id] = gens[e.id] + 1
+        freeList.add(e.id)
+    }
+
     public func addComponent<T>(entity: Entity, component: T): Unit where T <: Component<T> {
         if (!alive(entity)) {
             return
@@ -59,15 +73,4 @@ public class Registry {
         T.remove(entity)
     }
 
-    public func view1<A>(): View1<A> where A <: Component<A> {
-        View1<A>()
-    }
-
-    public func view2<A, B>(): View2<A, B> where A <: Component<A>, B <: Component<B> {
-        View2<A, B>()
-    }
-
-    public func view3<A, B, C>(): View3<A, B, C> where A <: Component<A>, B <: Component<B>, C <: Component<C> {
-        View3<A, B, C>()
-    }
 }

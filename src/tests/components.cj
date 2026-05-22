@@ -73,3 +73,16 @@ public struct Team {
         this.teamId = teamId
     }
 }
+
+@Component
+public struct Damage {
+    public var amount: Int64
+
+    public init() {
+        this.amount = 0
+    }
+
+    public init(amount: Int64) {
+        this.amount = amount
+    }
+}

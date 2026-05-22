@@ -7,12 +7,17 @@ public macro Component(input: Tokens): Tokens {
         case sd: StructDecl =>
             let poolIdent = Token(IDENTIFIER, "_pool_${sd.identifier.value}")
             let ty = sd.identifier
+            let nameLit = Token(STRING_LITERAL, sd.identifier.value)
             return quote(
                 $(input)
 
                 private let $(poolIdent) = ComponentPool<$(ty)>()
 
                 extend $(ty) <: Component<$(ty)> {
+                    public static func name(): String {
+                        $(nameLit)
+                    }
+
                     public static func add(entity: Entity, value: $(ty)): Unit {
                         $(poolIdent).add(entity, value)
                     }

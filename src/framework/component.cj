@@ -1,6 +1,8 @@
 package ecsFramework.framework
 
 public interface Component<T> {
+    static func name(): String
+
     static func add(entity: Entity, value: T): Unit
     static func get(entity: Entity): T
     static func has(entity: Entity): Bool

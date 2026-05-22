@@ -3,56 +3,49 @@ package ecsFramework
 import ecsFramework.framework.*
 import ecsFramework.tests.*
 
+func dumpState(w: World): Unit {
+    println("WORLD STATE:")
+    Query2<Position, Health>().each(w.registry(), {
+        eid, pos, hp => println("eid=${eid} pos=(${pos.x}, ${pos.y}) hp=${hp.hp}")
+    })
+}
+
 main(): Int64 {
-    let reg = Registry()
+    let w = World()
 
-    let e1 = reg.createEntity()
-    let e2 = reg.createEntity()
-    let e3 = reg.createEntity()
+    let e1 = w.create()
+    w
+        .add<Position>(e1, Position(0.0, 0.0))
+        .add<Velocity>(e1, Velocity(1.0, 0.5))
+        .add<Health>(e1, Health(100))
+        .add<Armor>(e1, Armor(2))
+        .add<Damage>(e1, Damage(10))
+        .add<Team>(e1, Team(1))
 
-    reg.addComponent<Position>(e1, Position(10.0, 20.0))
-    reg.addComponent<Velocity>(e1, Velocity(1.0, 2.0))
-    reg.addComponent<Health>(e1, Health(100))
-    reg.addComponent<Armor>(e1, Armor(5))
-    reg.addComponent<Team>(e1, Team(1))
+    let e2 = w.create()
+    w
+        .add<Position>(e2, Position(100.0, 100.0))
+        .add<Velocity>(e2, Velocity(-1.0, 0.0))
+        .add<Health>(e2, Health(30))
+        .add<Armor>(e2, Armor(0))
+        .add<Damage>(e2, Damage(15))
+        .add<Team>(e2, Team(2))
 
-    reg.addComponent<Position>(e2, Position(30.0, 40.0))
-    reg.addComponent<Velocity>(e2, Velocity(3.0, 4.0))
-    reg.addComponent<Health>(e2, Health(80))
-    reg.addComponent<Team>(e2, Team(2))
+    let e3 = w.create()
+    w.add<Position>(e3, Position(50.0, 50.0)).add<Health>(e3, Health(50)).add<Team>(e3, Team(1))
 
-    reg.addComponent<Position>(e3, Position(50.0, 60.0))
-    reg.addComponent<Health>(e3, Health(60))
-    reg.addComponent<Armor>(e3, Armor(2))
-    reg.addComponent<Team>(e3, Team(1))
+    w.addSystem(moveSystem_system).addSystem(damageSystem_system).addSystem(cleanupSystem_system)
 
-    println("=== get/has test ===")
-    if (reg.hasComponent<Position>(e1)) {
-        let p = reg.getComponent<Position>(e1)
-        println("e1 Position = (${p.x}, ${p.y})")
+    dumpState(w)
+
+    let ticks: Int64 = 5
+    var t: Int64 = 0
+    while (t < ticks) {
+        w.tick()
+        println("============ after tick ${t + 1} ============")
+        dumpState(w)
+        t += 1
     }
-
-    println("=== view1<Position> ===")
-    let v1 = reg.view1<Position>()
-    v1.each({
-        eid, pos => println("eid=${eid}, pos=(${pos.x}, ${pos.y})")
-    })
-
-    println("=== view2<Position, Velocity> ===")
-    let v2 = reg.view2<Position, Velocity>()
-    v2.each({
-        eid, pos, vel => println("eid=${eid}, pos=(${pos.x}, ${pos.y}), vel=(${vel.vx}, ${vel.vy})")
-    })
-
-    println("=== view3<Health, Armor, Team> ===")
-    let v3 = reg.view3<Health, Armor, Team>()
-    v3.each({
-        eid, hp, armor, team => println("eid=${eid}, hp=${hp.hp}, armor=${armor.value}, team=${team.teamId}")
-    })
-
-    println("=== remove test ===")
-    reg.removeComponent<Position>(e1)
-    println("e1 has Position = ${reg.hasComponent<Position>(e1)}")
 
     return 0
 }
