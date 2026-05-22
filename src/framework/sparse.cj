@@ -1,4 +1,4 @@
-package ecsFramework
+package ecsFramework.framework
 
 import std.collection.*
 

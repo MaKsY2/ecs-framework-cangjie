@@ -3,11 +3,12 @@
   name = "ecsFramework"
   description = "nothing here"
   version = "1.0.0"
-  target-dir = ""
   output-type = "executable"
-  compile-option = ""
+  compile-option = "-O2 --diagnostic-format=noColor"
   override-compile-option = ""
   link-option = ""
-  package-configuration = {}
+  [package.package-configuration]
 
 [dependencies]
+  [dependencies.ecsmacros]
+    path = "./macros"
