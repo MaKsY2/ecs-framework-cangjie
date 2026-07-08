@@ -1,17 +1,14 @@
 package ecsFramework.framework
 
+import std.collection.*
+
 public class World {
     private let reg: Registry
-    private let sch: Scheduler
+    private let systems: ArrayList<System>
 
     public init() {
         this.reg = Registry()
-        this.sch = Scheduler()
-    }
-
-    public init(workerCount: Int64) {
-        this.reg = Registry()
-        this.sch = Scheduler(workerCount)
+        this.systems = ArrayList<System>()
     }
 
     public func create(): Entity {
@@ -44,22 +41,22 @@ public class World {
     }
 
     public func addSystem(s: System): World {
-        sch.add(s)
+        systems.add(s)
         this
     }
 
     public func tick(): Unit {
-        sch.tick(reg)
-    }
-
-    public func tickSequential(): Unit {
-        sch.tickSequential(reg)
+        var i: Int64 = 0
+        while (i < systems.size) {
+            systems[i].run()
+            i += 1
+        }
     }
 
     public func run(ticks: Int64): Unit {
         var t: Int64 = 0
         while (t < ticks) {
-            sch.tick(reg)
+            tick()
             t += 1
         }
     }

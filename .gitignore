@@ -1,6 +1,7 @@
 .cache
 .vscode
+.*
 target
 .DS_Store
-
+preza.md
 *.macrocall

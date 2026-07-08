@@ -28,18 +28,12 @@ func expandSystem(attrs: Tokens, input: Tokens): Tokens {
             let structuralLit = if (isStructural) { quote(true) } else { quote(false) }
 
             var accessElems = Tokens()
-            var runArgs = quote(ctx)
-            var idx = 0
             for (p in fd.funcParams) {
-                if (idx >= 1) {
-                    let qt = p.paramType.toTokens()
-                    if (accessElems.size > 0) {
-                        accessElems = accessElems + quote(,)
-                    }
-                    accessElems = accessElems + quote($(qt)())
-                    runArgs = runArgs + quote(, $(qt)())
+                let qt = p.paramType.toTokens()
+                if (accessElems.size > 0) {
+                    accessElems = accessElems + quote(,)
                 }
-                idx += 1
+                accessElems = accessElems + quote($(qt)())
             }
             let accessBody = if (accessElems.size == 0) {
                 quote(Array<Access>())
@@ -54,7 +48,7 @@ func expandSystem(attrs: Tokens, input: Tokens): Tokens {
                     public override func name(): String { $(nameLit) }
                     public override func structural(): Bool { $(structuralLit) }
                     public override func access(): Array<Access> { $(accessBody) }
-                    public override func run(ctx: SystemContext): Unit { $(fnIdent)($(runArgs)) }
+                    public override func run(): Unit { $(fnIdent)($(accessElems)) }
                 }
 
                 public let $(instanceIdent): System = $(wrapperIdent)()
@@ -64,7 +58,7 @@ func expandSystem(attrs: Tokens, input: Tokens): Tokens {
                 DiagReportLevel.ERROR,
                 input,
                 "`@System` must be applied to a func",
-                "example: @System public func moveSystem(ctx: SystemContext, q: Query2<Mut<Position>, Velocity>): Unit { ... }"
+                "example: @System public func moveSystem(q: Query2<Mut<Position>, Velocity>): Unit { ... }"
             )
             return input
     }

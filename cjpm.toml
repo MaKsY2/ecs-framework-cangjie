@@ -4,7 +4,7 @@
   description = "nothing here"
   version = "1.0.0"
   output-type = "executable"
-  compile-option = "-O2 --diagnostic-format=noColor"
+  compile-option = "-O2 --fast-math --int-overflow wrapping -Woff unused --diagnostic-format=noColor"
   override-compile-option = ""
   link-option = ""
   [package.package-configuration]

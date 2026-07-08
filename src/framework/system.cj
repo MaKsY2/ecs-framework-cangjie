@@ -17,7 +17,7 @@ public open class System {
         Array<Access>()
     }
 
-    public open func run(_: SystemContext): Unit {}
+    public open func run(): Unit {}
 
     public func reads(): Array<String> {
         collect { a => a.reads() }

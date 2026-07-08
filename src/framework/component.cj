@@ -18,4 +18,11 @@ public interface Component<T> {
     static func denseValueAt(i: Int64): T
     static func denseSetAt(i: Int64, value: T): Unit
     static func denseIndexOf(entityId: Int64): Int64
+    static func tryIndexOf(entityId: Int64): Int64
+
+    static func rawEntities(): Array<Int64>
+    static func rawSparse(): Array<Int64>
+
+    static func swapDense(i: Int64, j: Int64): Unit
+    static func registerHooks(onAdd: (Int64) -> Unit, onRemove: (Int64) -> Unit): Unit
 }

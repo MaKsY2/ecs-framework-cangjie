@@ -1,15 +1,5 @@
 package ecsFramework.framework
 
-/**
- * Entity manager backed by a single raw `Array<Entity>` instead of two
- * `ArrayList`s (`gens` + `freeList`).
- *
- * The free list is *implicit*: a destroyed slot stores the previous free-list
- * head in its position bits and its bumped generation in its generation bits,
- * so recycling is a couple of reads and writes with no separate container and
- * no `ArrayList` growth/version bookkeeping. `nextPos` is the head of that list
- * and `availableCnt` how many slots it holds.
- */
 public class Registry {
     private var entities: Array<Entity>
     private var entitiesSize: Int64
@@ -33,7 +23,6 @@ public class Registry {
 
     public func createEntity(): Entity {
         if (availableCnt > 0) {
-            // Pop a slot off the implicit free list embedded in `entities`.
             let pos = nextPos
             let recycled = entities[pos]
             nextPos = recycled.id
@@ -62,8 +51,6 @@ public class Registry {
             return
         }
         let pos = e.id
-        // Bump the generation (invalidates outstanding handles) and link the
-        // slot back into the free list.
         entities[pos] = Entity.make(nextPos, e.gen + 1)
         nextPos = pos
         availableCnt += 1
@@ -98,7 +85,11 @@ public class Registry {
         if (pos < entities.size) {
             return
         }
-        let newCap = if (entities.size == 0) { 16 } else { entities.size * 2 }
+        let newCap = if (entities.size == 0) {
+            16
+        } else {
+            entities.size * 2
+        }
         let bigger = Array<Entity>(newCap, repeat: Entity())
         entities.copyTo(bigger, 0, 0, entitiesSize)
         entities = bigger

@@ -1,4 +1,4 @@
-package ecsFramework.tests
+package ecsFramework.legacy.tests
 
 import ecsmacros.*
 import ecsFramework.framework.*

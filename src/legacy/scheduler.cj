@@ -1,13 +1,13 @@
-package ecsFramework.framework
+package ecsFramework.legacy
 
 import std.collection.*
 import std.sync.*
+import ecsFramework.framework.*
 
 public class Scheduler {
     private let systems: ArrayList<System>
     private let workerCount: Int64
 
-    // Cached dependency graph (built lazily, invalidated when systems change).
     private var graphBuilt: Bool = false
     private var deps: Array<Int64> = Array<Int64>()
     private var successors: Array<ArrayList<Int64>> = Array<ArrayList<Int64>>()
@@ -18,7 +18,11 @@ public class Scheduler {
 
     public init(workerCount: Int64) {
         this.systems = ArrayList<System>()
-        this.workerCount = if (workerCount < 1) { 1 } else { workerCount }
+        this.workerCount = if (workerCount < 1) {
+            1
+        } else {
+            workerCount
+        }
     }
 
     public func add(s: System): Unit {
@@ -63,7 +67,7 @@ public class Scheduler {
     private func buildGraph(): Unit {
         let n = systems.size
         deps = Array<Int64>(n, repeat: 0)
-        successors = Array<ArrayList<Int64>>(n, { _ => ArrayList<Int64>() })
+        successors = Array<ArrayList<Int64>>(n, {_ => ArrayList<Int64>()})
         var i = 0
         while (i < n) {
             var j = 0
@@ -100,11 +104,17 @@ public class Scheduler {
         }
         let completed = AtomicInt64(0)
         let mtx = Mutex()
-        let cond = synchronized(mtx) { mtx.condition() }
+        let cond = synchronized(mtx) {
+            mtx.condition()
+        }
 
         let workers = ArrayList<Future<Unit>>()
         var w = 0
-        let wc = if (workerCount < n) { workerCount } else { n }
+        let wc = if (workerCount < n) {
+            workerCount
+        } else {
+            n
+        }
         while (w < wc) {
             let f: Future<Unit> = spawn {
                 while (true) {
@@ -120,7 +130,7 @@ public class Scheduler {
                     }
 
                     let s = systems[id]
-                    s.run(SystemContext(reg, s.structural(), s.name()))
+                    s.run()
 
                     synchronized(mtx) {
                         for (k in successors[id]) {
@@ -146,9 +156,7 @@ public class Scheduler {
     public func tickSequential(reg: Registry): Unit {
         var i: Int64 = 0
         while (i < systems.size) {
-            let s = systems[i]
-            let ctx = SystemContext(reg, s.structural(), s.name())
-            s.run(ctx)
+            systems[i].run()
             i += 1
         }
     }

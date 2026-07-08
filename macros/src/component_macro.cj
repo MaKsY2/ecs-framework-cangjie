@@ -60,6 +60,32 @@ public macro Component(input: Tokens): Tokens {
                     }
 
                     @Frozen
+                    public static func tryIndexOf(entityId: Int64): Int64 {
+                        $(poolIdent).tryIndexOf(entityId)
+                    }
+
+                    @Frozen
+                    public static func rawEntities(): Array<Int64> {
+                        $(poolIdent).rawEntities()
+                    }
+
+                    @Frozen
+                    public static func rawSparse(): Array<Int64> {
+                        $(poolIdent).rawSparse()
+                    }
+
+                    public static func swapDense(i: Int64, j: Int64): Unit {
+                        $(poolIdent).swapDense(i, j)
+                    }
+
+                    public static func registerHooks(
+                        onAdd: (Int64) -> Unit,
+                        onRemove: (Int64) -> Unit
+                    ): Unit {
+                        $(poolIdent).registerHooks(onAdd, onRemove)
+                    }
+
+                    @Frozen
                     public static func getById(entityId: Int64): $(ty) {
                         $(poolIdent).getById(entityId)
                     }
@@ -76,6 +102,56 @@ public macro Component(input: Tokens): Tokens {
 
                     public static func removeById(entityId: Int64): Unit {
                         $(poolIdent).removeById(entityId)
+                    }
+                }
+
+                extend $(ty) <: QueryParam<$(ty)> {
+                    public static func paramName(): String {
+                        $(nameLit)
+                    }
+
+                    public static func paramIsWrite(): Bool {
+                        false
+                    }
+
+                    @Frozen
+                    public static func paramDenseSize(): Int64 {
+                        $(poolIdent).denseSize()
+                    }
+
+                    @Frozen
+                    public static func paramEntityAt(i: Int64): Int64 {
+                        $(poolIdent).denseEntityAt(i)
+                    }
+
+                    @Frozen
+                    public static func paramHas(eid: Int64): Bool {
+                        $(poolIdent).hasById(eid)
+                    }
+
+                    @Frozen
+                    public static func paramTryIndexOf(eid: Int64): Int64 {
+                        $(poolIdent).tryIndexOf(eid)
+                    }
+
+                    @Frozen
+                    public static func paramEntitiesRaw(): Array<Int64> {
+                        $(poolIdent).rawEntities()
+                    }
+
+                    @Frozen
+                    public static func paramSparseRaw(): Array<Int64> {
+                        $(poolIdent).rawSparse()
+                    }
+
+                    @Frozen
+                    public static func paramHandle(eid: Int64): $(ty) {
+                        $(poolIdent).getById(eid)
+                    }
+
+                    @Frozen
+                    public static func paramHandleAt(i: Int64): $(ty) {
+                        $(poolIdent).denseValueAt(i)
                     }
                 }
             )
