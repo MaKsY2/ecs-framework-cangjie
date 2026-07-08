@@ -5,8 +5,8 @@ import ecsmacros.*
 import ecsFramework.framework.*
 
 @System
-public func moveSystem(ctx: SystemContext): Unit {
-    Query2<Mut<Position>, Velocity>().each(ctx.registry(), {
+public func moveSystem(ctx: SystemContext, q: Query2<Mut<Position>, Velocity>): Unit {
+    q.each(ctx.registry(), {
         _, pos, vel =>
         let p = pos.get()
         pos.set(Position(p.x + vel.vx, p.y + vel.vy))
@@ -14,8 +14,8 @@ public func moveSystem(ctx: SystemContext): Unit {
 }
 
 @System
-public func damageSystem(ctx: SystemContext): Unit {
-    Query3<Mut<Health>, Armor, Damage>().each(ctx.registry(), {
+public func damageSystem(ctx: SystemContext, q: Query3<Mut<Health>, Armor, Damage>): Unit {
+    q.each(ctx.registry(), {
         _, hp, armor, dmg =>
         var raw = dmg.amount - armor.value
         if (raw < 0) {
@@ -27,9 +27,9 @@ public func damageSystem(ctx: SystemContext): Unit {
 }
 
 @System[structural]
-public func cleanupSystem(ctx: SystemContext): Unit {
+public func cleanupSystem(ctx: SystemContext, q: Query1<Health>): Unit {
     let toDestroy = ArrayList<Int64>()
-    Query1<Health>().each(ctx.registry(), {
+    q.each(ctx.registry(), {
         eid, hp =>
         if (hp.hp <= 0) {
             toDestroy.add(eid)

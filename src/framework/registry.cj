@@ -1,50 +1,72 @@
 package ecsFramework.framework
 
-import std.collection.*
-
+/**
+ * Entity manager backed by a single raw `Array<Entity>` instead of two
+ * `ArrayList`s (`gens` + `freeList`).
+ *
+ * The free list is *implicit*: a destroyed slot stores the previous free-list
+ * head in its position bits and its bumped generation in its generation bits,
+ * so recycling is a couple of reads and writes with no separate container and
+ * no `ArrayList` growth/version bookkeeping. `nextPos` is the head of that list
+ * and `availableCnt` how many slots it holds.
+ */
 public class Registry {
-    var gens: ArrayList<Int64>
-    var freeList: ArrayList<Int64>
+    private var entities: Array<Entity>
+    private var entitiesSize: Int64
+    private var availableCnt: Int64
+    private var nextPos: Int64
 
     public init() {
-        gens = ArrayList<Int64>()
-        freeList = ArrayList<Int64>()
+        entities = Array<Entity>()
+        entitiesSize = 0
+        availableCnt = 0
+        nextPos = 0
     }
 
     public func alive(e: Entity): Bool {
-        if (e.id < 0) {
+        let pos = e.id
+        if (pos >= entitiesSize) {
             return false
         }
-        if (e.id >= gens.size) {
-            return false
-        }
-        gens[e.id] == e.gen
+        entities[pos].genEq(e)
     }
 
     public func createEntity(): Entity {
-        if (freeList.size > 0) {
-            let id = freeList.remove(at: freeList.size - 1)
-            Entity(id, gens[id])
-        } else {
-            let id: Int64 = gens.size
-            gens.add(0)
-            Entity(id, 0)
+        if (availableCnt > 0) {
+            // Pop a slot off the implicit free list embedded in `entities`.
+            let pos = nextPos
+            let recycled = entities[pos]
+            nextPos = recycled.id
+            availableCnt -= 1
+            let e = Entity.make(pos, recycled.gen)
+            entities[pos] = e
+            return e
         }
+        let pos = entitiesSize
+        ensureCapacity(pos)
+        let e = Entity.make(pos, 0)
+        entities[pos] = e
+        entitiesSize = pos + 1
+        return e
     }
 
     public func entityOf(id: Int64): Entity {
-        if (id < 0 || id >= gens.size) {
+        if (id < 0 || id >= entitiesSize) {
             return Entity()
         }
-        Entity(id, gens[id])
+        Entity.make(id, entities[id].gen)
     }
 
     public func destroyEntity(e: Entity): Unit {
         if (!alive(e)) {
             return
         }
-        gens[e.id] = gens[e.id] + 1
-        freeList.add(e.id)
+        let pos = e.id
+        // Bump the generation (invalidates outstanding handles) and link the
+        // slot back into the free list.
+        entities[pos] = Entity.make(nextPos, e.gen + 1)
+        nextPos = pos
+        availableCnt += 1
     }
 
     public func addComponent<T>(entity: Entity, component: T): Unit where T <: Component<T> {
@@ -58,7 +80,6 @@ public class Registry {
         if (!alive(entity)) {
             return false
         }
-
         T.has(entity)
     }
 
@@ -73,4 +94,13 @@ public class Registry {
         T.remove(entity)
     }
 
+    private func ensureCapacity(pos: Int64): Unit {
+        if (pos < entities.size) {
+            return
+        }
+        let newCap = if (entities.size == 0) { 16 } else { entities.size * 2 }
+        let bigger = Array<Entity>(newCap, repeat: Entity())
+        entities.copyTo(bigger, 0, 0, entitiesSize)
+        entities = bigger
+    }
 }

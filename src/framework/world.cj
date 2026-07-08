@@ -9,6 +9,11 @@ public class World {
         this.sch = Scheduler()
     }
 
+    public init(workerCount: Int64) {
+        this.reg = Registry()
+        this.sch = Scheduler(workerCount)
+    }
+
     public func create(): Entity {
         reg.createEntity()
     }
@@ -45,6 +50,10 @@ public class World {
 
     public func tick(): Unit {
         sch.tick(reg)
+    }
+
+    public func tickSequential(): Unit {
+        sch.tickSequential(reg)
     }
 
     public func run(ticks: Int64): Unit {

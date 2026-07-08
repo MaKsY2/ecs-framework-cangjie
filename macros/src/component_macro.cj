@@ -34,22 +34,42 @@ public macro Component(input: Tokens): Tokens {
                         $(poolIdent).remove(entity)
                     }
 
+                    @Frozen
                     public static func denseSize(): Int64 {
                         $(poolIdent).denseSize()
                     }
 
+                    @Frozen
                     public static func denseEntityAt(i: Int64): Int64 {
                         $(poolIdent).denseEntityAt(i)
                     }
 
+                    @Frozen
                     public static func denseValueAt(i: Int64): $(ty) {
                         $(poolIdent).denseValueAt(i)
                     }
 
+                    @Frozen
+                    public static func denseSetAt(i: Int64, value: $(ty)): Unit {
+                        $(poolIdent).denseSetAt(i, value)
+                    }
+
+                    @Frozen
+                    public static func denseIndexOf(entityId: Int64): Int64 {
+                        $(poolIdent).denseIndexOf(entityId)
+                    }
+
+                    @Frozen
                     public static func getById(entityId: Int64): $(ty) {
                         $(poolIdent).getById(entityId)
                     }
 
+                    @Frozen
+                    public static func setById(entityId: Int64, value: $(ty)): Unit {
+                        $(poolIdent).setById(entityId, value)
+                    }
+
+                    @Frozen
                     public static func hasById(entityId: Int64): Bool {
                         $(poolIdent).hasById(entityId)
                     }

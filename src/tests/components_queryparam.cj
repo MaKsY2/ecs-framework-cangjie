@@ -18,8 +18,11 @@ extend Position <: QueryParam<Position> {
     public static func paramHas(eid: Int64): Bool {
         Position.hasById(eid)
     }
-    public static func paramHandle(eid: Int64, _: Registry): Position {
+    @Frozen public static func paramHandle(eid: Int64): Position {
         Position.getById(eid)
+    }
+    @Frozen public static func paramHandleAt(i: Int64): Position {
+        Position.denseValueAt(i)
     }
 }
 
@@ -39,8 +42,11 @@ extend Velocity <: QueryParam<Velocity> {
     public static func paramHas(eid: Int64): Bool {
         Velocity.hasById(eid)
     }
-    public static func paramHandle(eid: Int64, _: Registry): Velocity {
+    @Frozen public static func paramHandle(eid: Int64): Velocity {
         Velocity.getById(eid)
+    }
+    @Frozen public static func paramHandleAt(i: Int64): Velocity {
+        Velocity.denseValueAt(i)
     }
 }
 
@@ -60,8 +66,11 @@ extend Health <: QueryParam<Health> {
     public static func paramHas(eid: Int64): Bool {
         Health.hasById(eid)
     }
-    public static func paramHandle(eid: Int64, _: Registry): Health {
+    @Frozen public static func paramHandle(eid: Int64): Health {
         Health.getById(eid)
+    }
+    @Frozen public static func paramHandleAt(i: Int64): Health {
+        Health.denseValueAt(i)
     }
 }
 
@@ -81,8 +90,11 @@ extend Armor <: QueryParam<Armor> {
     public static func paramHas(eid: Int64): Bool {
         Armor.hasById(eid)
     }
-    public static func paramHandle(eid: Int64, _: Registry): Armor {
+    @Frozen public static func paramHandle(eid: Int64): Armor {
         Armor.getById(eid)
+    }
+    @Frozen public static func paramHandleAt(i: Int64): Armor {
+        Armor.denseValueAt(i)
     }
 }
 
@@ -102,8 +114,11 @@ extend Damage <: QueryParam<Damage> {
     public static func paramHas(eid: Int64): Bool {
         Damage.hasById(eid)
     }
-    public static func paramHandle(eid: Int64, _: Registry): Damage {
+    @Frozen public static func paramHandle(eid: Int64): Damage {
         Damage.getById(eid)
+    }
+    @Frozen public static func paramHandleAt(i: Int64): Damage {
+        Damage.denseValueAt(i)
     }
 }
 
@@ -123,7 +138,10 @@ extend Team <: QueryParam<Team> {
     public static func paramHas(eid: Int64): Bool {
         Team.hasById(eid)
     }
-    public static func paramHandle(eid: Int64, _: Registry): Team {
+    @Frozen public static func paramHandle(eid: Int64): Team {
         Team.getById(eid)
+    }
+    @Frozen public static func paramHandleAt(i: Int64): Team {
+        Team.denseValueAt(i)
     }
 }
