@@ -15,12 +15,12 @@ public class World {
         reg.createEntity()
     }
 
-    public func destroy(e: Entity): Unit {
-        reg.destroyEntity(e)
+    public func entityOf(id: Int64): Entity {
+        reg.entityOf(id)
     }
 
-    public func alive(e: Entity): Bool {
-        reg.alive(e)
+    public func destroy(e: Entity): Unit {
+        reg.destroyEntity(e)
     }
 
     public func add<T>(e: Entity, value: T): World where T <: Component<T> {
@@ -59,9 +59,5 @@ public class World {
             tick()
             t += 1
         }
-    }
-
-    public func registry(): Registry {
-        reg
     }
 }

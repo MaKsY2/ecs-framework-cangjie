@@ -1,10 +1,6 @@
 package ecsFramework.framework
 
-public interface ISparseSet {
-    mut func onEntityDestroyed(index: Int64): Unit
-}
-
-public class SparseSet<T> <: ISparseSet {
+public class SparseSet<T> {
     public static let NPOS: Int64 = -1
 
     private var denseData: Array<T>
@@ -46,14 +42,6 @@ public class SparseSet<T> <: ISparseSet {
     }
 
     @Frozen
-    public func tryIndexOf(entityId: Int64): Int64 {
-        if (entityId < 0 || entityId >= sparse.size) {
-            return NPOS
-        }
-        sparse[entityId]
-    }
-
-    @Frozen
     public func rawEntities(): Array<Int64> {
         denseEntities
     }
@@ -74,13 +62,6 @@ public class SparseSet<T> <: ISparseSet {
     @Frozen
     public func get(entityId: Int64): T {
         denseData[sparse[entityId]]
-    }
-
-    @Frozen
-    public func set(entityId: Int64, value: T): Unit {
-        if (has(entityId)) {
-            denseData[sparse[entityId]] = value
-        }
     }
 
     public func add(entityId: Int64, value: T): Bool {
@@ -137,10 +118,6 @@ public class SparseSet<T> <: ISparseSet {
         denseData[last] = unsafe { zeroValue<T>() }
         sparse[entityId] = NPOS
         count = last
-    }
-
-    public func onEntityDestroyed(index: Int64): Unit {
-        remove(index)
     }
 
     private func ensureSparse(entityId: Int64): Unit {

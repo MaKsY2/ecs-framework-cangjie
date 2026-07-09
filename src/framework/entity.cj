@@ -32,9 +32,6 @@ public struct Entity {
         }
     }
 
-    public func isValid(): Bool {
-        inner != INVALID
-    }
     const func genEq(rhs: Entity): Bool {
         ((inner & GEN_MASK) ^ rhs.inner) < POS_MAX
     }

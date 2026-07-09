@@ -2,6 +2,8 @@ package ecsFramework
 
 import ecsmacros.*
 import ecsFramework.framework.*
+import ecsFramework.bench.*
+import ecsFramework.game.*
 
 // A small "game world" demo showing the everyday API:
 //   @Component  — declare a component (a plain struct).
@@ -47,7 +49,7 @@ public struct Poison {
 let movers = OwnGroup2<Position, Velocity>()
 
 @System
-public func movement(q: Query2<Mut<Position>, Velocity>): Unit {
+public func movement(): Unit {
     @EachG2[Position, pi, Velocity, vi, eid, movers](
         let p = Position.denseValueAt(pi)
         let v = Velocity.denseValueAt(vi)
@@ -56,7 +58,7 @@ public func movement(q: Query2<Mut<Position>, Velocity>): Unit {
 }
 
 @System
-public func poisonTick(q: Query2<Mut<Health>, Poison>): Unit {
+public func poisonTick(): Unit {
     @Each2[Health, hi, Poison, pi, eid](
         let h = Health.denseValueAt(hi)
         Health.denseSetAt(hi, Health(h.hp - Poison.denseValueAt(pi).perTick))
@@ -72,7 +74,19 @@ func spawnActor(w: World, x: Float64, y: Float64, dx: Float64, dy: Float64, hp: 
     e
 }
 
-main(): Int64 {
+// `cjpm run` — the swarm game; `cjpm run -- bench` — API demo + benchmark suite.
+main(args: Array<String>): Int64 {
+    var bench = false
+    for (a in args) {
+        if (a == "bench") {
+            bench = true
+        }
+    }
+    if (!bench) {
+        runGame()
+        return 0
+    }
+
     let world = World()
     movers.activate()
 
@@ -103,6 +117,9 @@ main(): Int64 {
         }
     )
     println("entities still alive: ${alive}")
+
+    println("")
+    runBenchmarks()
     0
 }
 

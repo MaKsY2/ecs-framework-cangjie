@@ -2,7 +2,7 @@ package ecsFramework.framework
 
 import std.collection.*
 
-public class ComponentPool<T> <: IComponentStorage<T> {
+public class ComponentPool<T> {
     private let sparse = SparseSet<T>()
 
     private let addHooks = ArrayList<(Int64) -> Unit>()
@@ -35,16 +35,6 @@ public class ComponentPool<T> <: IComponentStorage<T> {
 
     public func swapDense(i: Int64, j: Int64): Unit {
         sparse.swapDense(i, j)
-    }
-
-    @Frozen
-    public func getById(entityId: Int64): T {
-        sparse.get(entityId)
-    }
-
-    @Frozen
-    public func setById(entityId: Int64, value: T): Unit {
-        sparse.set(entityId, value)
     }
 
     @Frozen
@@ -84,11 +74,6 @@ public class ComponentPool<T> <: IComponentStorage<T> {
     @Frozen
     public func denseIndexOf(entityId: Int64): Int64 {
         sparse.denseIndexOf(entityId)
-    }
-
-    @Frozen
-    public func tryIndexOf(entityId: Int64): Int64 {
-        sparse.tryIndexOf(entityId)
     }
 
     @Frozen
